@@ -28,9 +28,17 @@ namespace ExemploMediatR
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMediatR((config) => config.AsScoped(), typeof(Startup));
-            services.AddScoped<ICommandValidator<ExemploCommand>, ExemploCommandValidator>();
-            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(CommandValidationPipelineBehavior<,>));
+            var types = typeof(ExemploCommandValidator).Assembly.GetTypes()
+                            .Where(w => w.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICommandValidator<>)))
+                            .Select(s => new
+                            {
+                                tp = s,
+                                tpInterface = s.GetInterfaces().FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICommandValidator<>))
+                            });
 
+            foreach (var item in types)
+                services.AddScoped(item.tpInterface, item.tp);
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(CommandValidationPipelineBehavior<,>));
 
             services.AddControllers();
         }

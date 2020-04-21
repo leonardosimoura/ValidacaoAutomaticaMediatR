@@ -22,14 +22,18 @@ namespace ExemploMediatR.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
             _logger.LogDebug("Cmd 1");
-            var cmd1 =_mediator.Send(new ExemploCommand { Exemplo = "" });
+            var cmd1 = await _mediator.Send(new ExemploCommand { Exemplo = "" });
             _logger.LogDebug("Cmd 2");
-            var cmd2= _mediator.Send(new ExemploCommand { Exemplo = "Exemplo" });
+            var cmd2 = await _mediator.Send(new ExemploCommand { Exemplo = "Exemplo" });
 
-            return Ok();
+            return Ok(new
+            {
+                cmd1,
+                cmd2
+            });
         }
     }
 }
